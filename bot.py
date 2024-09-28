@@ -1,7 +1,7 @@
 import os
 import subprocess
 import telegram
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+from telegram.ext import Updater, CommandHandler, MessageHandler, filters
 
 # Replace 'YOUR_TELEGRAM_BOT_TOKEN' with your actual Telegram bot token
 TELEGRAM_BOT_TOKEN = '7947881180:AAFbRZ-yu3_fF7WldMiTpCRxkSZJa_PWOyE'
@@ -32,7 +32,7 @@ def main():
     dp = updater.dispatcher
 
     dp.add_handler(CommandHandler('start', start))
-    dp.add_handler(MessageHandler(Filters.text & ~Filters.command, download_link))
+    dp.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, download_link))
 
     updater.start_polling()
     updater.idle()
