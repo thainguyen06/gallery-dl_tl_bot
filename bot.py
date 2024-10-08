@@ -9,9 +9,13 @@ TELEGRAM_BOT_TOKEN = 'TOKEN'
 API_ID = ID
 API_HASH = 'HASH'
 DOWNLOAD_DIR = 'downloads'
+PROCESSED_DIR = 'processed'
 
 if not os.path.exists(DOWNLOAD_DIR):
     os.makedirs(DOWNLOAD_DIR)
+
+if not os.path.exists(PROCESSED_DIR):
+    os.makedirs(PROCESSED_DIR)
 
 # Create a new client instance
 app = Client("my_bot", bot_token=TELEGRAM_BOT_TOKEN, api_id=API_ID, api_hash=API_HASH)
@@ -20,11 +24,24 @@ app = Client("my_bot", bot_token=TELEGRAM_BOT_TOKEN, api_id=API_ID, api_hash=API
 async def start(client: Client, message: Message):
     await message.reply_text('Send me a link to download and upload to Telegram.')
 
+async def process_video(file_path: str) -> str:
+    # Construct the output file path
+    file_name = os.path.basename(file_path)
+    output_path = os.path.join(PROCESSED_DIR, file_name)
+    
+    # Run the ffmpeg command to re-encode the video
+    command = ['ffmpeg', '-i', file_path, '-c:v', 'libx264', '-c:a', 'aac', '-strict', 'experimental', output_path]
+    subprocess.run(command, check=True)
+    
+    return output_path
+
 async def upload_file(client: Client, message: Message, file_path: str):
     file_extension = os.path.splitext(file_path)[1].lower()
     try:
         if file_extension in ['.mp4', '.mov']:
-            await client.send_video(chat_id=message.chat.id, video=file_path)
+            # Process the video file before uploading
+            processed_file_path = await process_video(file_path)
+            await client.send_video(chat_id=message.chat.id, video=processed_file_path)
         elif file_extension in ['.jpg', '.jpeg', '.png']:
             await client.send_photo(chat_id=message.chat.id, photo=file_path)
         elif file_extension in ['.mp3', '.wav']:
