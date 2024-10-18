@@ -2,3 +2,5 @@ gallery-dl
 python-telegram-bot
 pyrogram
 TgCrypto
+ffmpeg
+ffmpeg-python
